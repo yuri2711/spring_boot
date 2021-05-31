@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div th:fragment="content">
+    <h1 class="mb-4">User information-page</h1>
+    <div class="row-cols-auto  bg-white no-gutters">
+        <div class="col-12 bg-light border">
+            <h5 class="pl-3 pt-2 pb-2">About user</h5>
+        </div>
+        <div class="col-12 pl-3 pr-3 pt-3 border">
+            <table class="table table-striped ">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Имя</th>
+                    <th>Фамилия</th>
+                    <th>Возраст</th>
+                    <th>Роли</th>
+                    <th>редактировать</th>
+                    <th>Удалить</th>
+                </tr>
+                </thead>
+                <tbody id="tableUserBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script defer>
+        fetch('/admins/list').then(res => {
+                let temp = "";
+                res.json().then(userTable => {
+                        userTable.forEach(item => {
+                            temp += "<tr>";
+                            temp += "<td>" + item.id + "</td>";
+                            temp += "<td>" + item.name + "</td>";
+                            temp += "<td>" + item.lastname + "</td>";
+                            temp += "<td>" + item.age + "</td>";
+                            temp+= '<td>';
+                            item.roles.forEach(role => {
+                                temp += role.role + ' ';
+                            })
+                            temp+= '</td>';
+                            temp += "<td><button class='btn btn-info' onclick='editUserBTN(this)' id='editBTN'" + item.id + '>Редактирование</button></td>';
+                            temp += "<td><button class='btn btn-info' onclick='deleteUserBTN(this)' id='deleteBTN'" + item.id + '>Удаление</button></td></tr>';
+
+                        })
+                        document.getElementById("tableUserBody").innerHTML = temp;
+                    }
+                )
+            }
+        )
+    </script>
+</div>
+</body>
+</html>

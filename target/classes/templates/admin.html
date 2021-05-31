@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+<header th:insert="blocks/header :: header"></header>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-3 flex-column bg-white">
+            <nav class="nav flex-column">
+                <a class="nav-link active bg-primary text-white" aria-current="page" href="#">Admin</a>
+                <a class="nav-link" href="#">User</a>
+            </nav>
+        </nav>
+        <nav class="col flex-column">
+            <h2>Admin panel</h2>
+            <ul class="nav nav-tabs mb-3" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link btn border-0 active"
+                            id="usersTableBtn"
+                            data-toggle="pill"
+                            data-target="#usersTable"
+                            type="button"
+                            role="tab"
+                            aria-controls="usersTable"
+                            aria-selected="true">Таблица пользователей
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link"
+                            id="newUserBtn"
+                            data-toggle="pill"
+                            data-target="#newUser"
+                            role="tab"
+                            aria-controls="newUser"
+                            aria-selected="false">Добавить пользователя
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="pills-tabContent">
+                <!--                тут вроде все готово-->
+                <div class="tab-pane fade show active" id="usersTable"
+                     role="tabpanel"
+                     aria-labelledby="userTableBtn">
+                    <div th:replace="UsersTable :: content"></div>
+                </div>
+                <!--добавление пользователя все готово-->
+                <div class="tab-pane fade" id="newUser" role="tabpanel" aria-labelledby="newUserBtn">
+                    <div th:replace="newUser :: content"></div>
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>
+<script defer>
+    let allRoles = [];
+    let allUsers = [];
+
+    fetch('/admins/list').then(listUser => {
+            listUser.json().then(user => {
+                    allUsers = user;
+                console.log(allUsers);
+                    createTable();
+                }
+            )
+        }
+    )
+
+    fetch('/admins/allRoles').then(
+        list => {
+            list.json().then(
+                roles => {
+                    allRoles = roles;
+                    console.log(allRoles);
+                }
+            )
+        }
+    )
+
+
+
+    function createTable() {
+        let temp = "";
+        allUsers.forEach(user => {
+            temp += "<tr id=\"" + user.id + "\">";
+            temp += "<td>" + user.id + "</td>";
+            temp += "<td>" + user.name + "</td>";
+            temp += "<td>" + user.lastname + "</td>";
+            temp += "<td>" + user.age + "</td>";
+            temp += "<td>";
+            let stringRole = "";
+            user.roles.forEach(r => {
+                stringRole += r.role + " ";
+            })
+            temp += stringRole + "</td>"
+            temp += "<td><button class='btn btn-info' onclick='editUserBTN(this)' id='editBTN'" + user.id + '>Редактирование</button></td>';
+            temp += "<td><button class='btn btn-info' onclick='deleteUserBTN(this)' id='deleteBTN'" + user.id + '>Удаление</button></td></tr>';
+        })
+        document.getElementById("tableUserBody").innerHTML = temp;
+    }
+
+    function editUserBTN(element) {
+
+    }
+
+    function deleteUserBTN(element) {
+
+    }
+
+    $('#addUserBtn').click(function () {
+        let newUser = {
+            name: "",
+            lastname: "",
+            pass: "",
+            age: 0,
+            roles: []
+        };
+        newUser.name = document.getElementById("nameNew").value;
+        newUser.lastname = document.getElementById("lastNameNew").value;
+        newUser.pass = document.getElementById("passwordNew").value;
+        newUser.age = document.getElementById("ageNew").value;
+        newUser.roles = [];
+        [].slice.call(document.getElementById("rolesNew")).forEach(op => {
+            if (op.selected) {
+                allRoles.forEach(r => {
+                    if (r.role == op.text) {
+
+                        newUser.roles.push(r);
+                    }
+                })
+            }
+        });
+        fetch('/admins/new', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json; charset=utf-8'},
+            Accept: 'application/json, */*; q=0.01',
+            body: JSON.stringify(newUser)
+        });
+        allUsers.push(newUser);
+        createTable();
+    })
+</script>
+</body>
+</html>
